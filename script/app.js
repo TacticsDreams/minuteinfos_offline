@@ -53,7 +53,37 @@ function saveArticlesToJSON(articles, outputPath) {
     }
   }
 
+  function generateArticleHTML(articles) {
+    return articles.map(article => `
+      <div class="article">
+        <h2>${article.title}</h2>
+        <p>${article.description}</p>
+        <img src="${article.image}" alt="${article.title}">
+        <p>Date: ${article.date.toDateString()}</p>
+        <p>Source: ${article.source}</p>
+      </div>
+    `).join('');
+  }
+
 // Example usage
 fetchArticlesFromAllSources().then(articles => {
   saveArticlesToJSON(articles, 'articles.json');
+  appendToHTML(articles, '../index.html');
 });
+
+function appendToHTML(articles, htmlFilePath) {
+  const existingHTML = fs.readFileSync(htmlFilePath, 'utf-8');
+  const newArticlesHTML = generateArticleHTML(articles);
+  const updatedHTMLContent = existingHTML.replace(
+    /<div id="articles-container">([\s\S]*?)<\/div>/,
+    `<div id="articles-container">$1${newArticlesHTML}</div>`
+  );
+
+  try {
+    fs.writeFileSync(htmlFilePath, updatedHTMLContent);
+    console.log('HTML file updated:', htmlFilePath);
+  } catch (error) {
+    console.error('Error updating HTML file:', error);
+    throw error;
+  }
+}
