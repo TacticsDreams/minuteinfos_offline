@@ -20,6 +20,7 @@ async function fetchArticlesFromRSSFeed(source) {
         description: item.contentSnippet,
         image: item.enclosure ? item.enclosure.url : null,
         date: new Date(item.isoDate),
+        link: item.link,
         source: source.name, // Add source information to each article
       }));
   
@@ -55,10 +56,10 @@ function saveArticlesToJSON(articles, outputPath) {
 
   function generateArticleHTML(articles) {
     return articles.map(article => `
-      <div class="article">
+      <div class="article" data-link="${article.link}">
         <h2>${article.title}</h2>
         <p>${article.description}</p>
-        <img src="${article.image}" alt="${article.title}">
+        ${article.image ? `<img src="${article.image}" alt="${article.title}">` : ''}
         <p>Date: ${article.date.toDateString()}</p>
         <p>Source: ${article.source}</p>
       </div>
@@ -69,7 +70,8 @@ function saveArticlesToJSON(articles, outputPath) {
 fetchArticlesFromAllSources().then(articles => {
   saveArticlesToJSON(articles, 'articles.json');
   appendToHTML(articles, '../index.html');
-});
+  }
+);
 
 function appendToHTML(articles, htmlFilePath) {
   const existingHTML = fs.readFileSync(htmlFilePath, 'utf-8');
