@@ -19,6 +19,7 @@ body {
     margin: 10px;
     padding: 15px;
     width: 300px;
+    cursor: pointer;
   }
   
   .article img {
