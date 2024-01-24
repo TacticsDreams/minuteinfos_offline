@@ -4,7 +4,9 @@ const fs = require('fs');
 
 const parser = new Parser();
 const sources = [
-    {name: 'BBC News', url: 'http://feeds.bbci.co.uk/news/rss.xml', maxArticles: 10}
+    {name: 'BBC News', url: 'http://feeds.bbci.co.uk/news/rss.xml', maxArticles: 10},
+    { name: 'CNN', url: 'http://rss.cnn.com/rss/cnn_topstories.rss', maxArticles: 10 },
+    { name: 'The New York Times', url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', maxArticles: 10 },
 ]
 
 async function fetchArticlesFromRSSFeed(source) {
@@ -17,7 +19,7 @@ async function fetchArticlesFromRSSFeed(source) {
       // Limit the number of articles based on the maxArticles property
       const articles = feed.items.slice(0, source.maxArticles).map(item => ({
         title: item.title,
-        description: item.contentSnippet,
+        description: item.contentSnippet || 'No description available',
         image: item.enclosure ? item.enclosure.url : null,
         date: new Date(item.isoDate),
         link: item.link,
@@ -43,41 +45,36 @@ async function fetchArticlesFromAllSources() {
 }
 
 function saveArticlesToJSON(articles, outputPath) {
-    const jsonContent = JSON.stringify(articles, null, 2);
+  const jsonContent = JSON.stringify(articles, null, 2);
   
-    try {
-      fs.writeFileSync(outputPath, jsonContent);
-      console.log('Articles saved to JSON file:', outputPath);
-    } catch (error) {
-      console.error('Error saving articles to JSON file:', error);
-      throw error;
-    }
+  try {
+    fs.writeFileSync(outputPath, jsonContent);
+    console.log('Articles saved to JSON file:', outputPath);
+  } catch (error) {
+    console.error('Error saving articles to JSON file:', error);
+    throw error;
   }
+}
 
-  function generateArticleHTML(articles) {
-    return articles.map(article => `
-      <div class="article" data-link="${article.link}">
-        <h2>${article.title}</h2>
-        <p>${article.description}</p>
-        ${article.image ? `<img src="${article.image}" alt="${article.title}">` : ''}
-        <p>Date: ${article.date.toDateString()}</p>
-        <p>Source: ${article.source}</p>
-      </div>
-    `).join('');
-  }
-
-// Example usage
-fetchArticlesFromAllSources().then(articles => {
-  saveArticlesToJSON(articles, 'articles.json');
-  appendToHTML(articles, '../index.html');
-  }
-);
+function generateArticleHTML(articles) {
+  return articles.map(article => `
+    <div class="article" data-link="${article.link}">
+      <h2>${article.title}</h2>
+      <p>${article.description}</p>
+      ${article.image ? `<img src="${article.image}" alt="${article.title}">` : ''}
+      <p>Date: ${article.date.toDateString()}</p>
+      <p>Source: ${article.source}</p>
+    </div>
+  `).join('');
+}
 
 function appendToHTML(articles, htmlFilePath) {
   const existingHTML = fs.readFileSync(htmlFilePath, 'utf-8');
   const newArticlesHTML = generateArticleHTML(articles);
+
+  // Updated regular expression to capture any content between the opening and closing <div> tags
   const updatedHTMLContent = existingHTML.replace(
-    /<div id="articles-container">([\s\S]*?)<\/div>/,
+    /<div id="articles-container">(.*?)<\/div>/s,
     `<div id="articles-container">$1${newArticlesHTML}</div>`
   );
 
@@ -89,3 +86,10 @@ function appendToHTML(articles, htmlFilePath) {
     throw error;
   }
 }
+
+// Example usage
+fetchArticlesFromAllSources().then(articles => {
+  saveArticlesToJSON(articles, 'articles.json');
+  appendToHTML(articles, '../index.html');
+  }
+);

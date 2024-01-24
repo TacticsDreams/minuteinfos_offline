@@ -21,6 +21,9 @@ body {
     width: 300px;
     cursor: pointer;
   }
+  .article:first-child {
+    width: 450px;
+  }
   
   .article img {
     max-width: 100%;
