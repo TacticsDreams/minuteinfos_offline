@@ -44,3 +44,40 @@ body {
     font-style: italic;
     color: #888;
   }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  /* Navigation bar styles */
+  nav {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+  }
+
+  /* Optional: Add some styles to make it visually appealing */
+  nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  /* Add some spacing below the navigation bar to avoid content overlap */
+  main {
+    margin-top: 50px;
+    padding: 20px;
+  }
+
+  /* Responsive styles for smaller screens */
+  @media only screen and (max-width: 600px) {
+    nav {
+      padding: 5px;
+    }
+  }
